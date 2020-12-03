@@ -91,7 +91,7 @@ void Student::setGPA() {
   while(true) {
     cout << "Enter the student's GPA." << endl;
     string tempGPA = "";
-    cin >> tempGPA;
+    getline(cin, tempGPA);
     bool decimalFound = false;
     bool isNum = false;
     for(int i = 0; i < tempGPA.length(); ++i) {
@@ -175,7 +175,7 @@ bool Student::operator >=(const Person& otherPerson) {
   return getLevelNumber(level) >= getLevelNumber(otherPerson.level);
 }
 
-ostream& operator<<(ostream &out, Student &student) {
+ostream &operator <<(ostream &out, Student &student) {
   out << "STUDENT ID: " << to_string(student.getID()) << "\n";
   out << "STUDENT NAME: " << student.getName() << "\n";
   out << "STUDENT LEVEL: " << student.getLevel() << "\n";

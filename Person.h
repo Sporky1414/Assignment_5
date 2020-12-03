@@ -15,7 +15,7 @@ class Person {
     virtual int getID() = 0;
     virtual string getName() = 0;
     virtual string getLevel() = 0;
-    virtual void setLevel(string newLevel) = 0;
+    virtual void setLevel() = 0;
 
     virtual bool operator ==(const Person& otherPerson) = 0;
     virtual bool operator <(const Person& otherPerson) = 0;
@@ -28,4 +28,6 @@ class Person {
     string level;
     int id;
     string name;
+  private:
+    virtual int getLevelNumber(string thisLevel) = 0;
 };

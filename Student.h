@@ -20,11 +20,11 @@ class Student: private Person {
     int getFacultyAdvisorID();
     void setNewAdvisor(int newFacultyAdvisorID);
 
-    bool operator ==(const Person& otherPerson) = 0;
-    bool operator <(const Person& otherPerson) = 0;
-    bool operator >(const Person& otherPerson) = 0;
-    bool operator >=(const Person& otherPerson) = 0;
-    bool operator <=(const Person& otherPerson) = 0;
+    bool operator ==(const Person& otherPerson);
+    bool operator <(const Person& otherPerson);
+    bool operator >(const Person& otherPerson);
+    bool operator >=(const Person& otherPerson);
+    bool operator <=(const Person& otherPerson);
 
     friend ostream &operator<<(ostream &out, Student &student);
     friend string to_string(Student &student);
