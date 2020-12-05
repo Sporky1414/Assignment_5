@@ -1,79 +1,13 @@
-2013
-Satvi Sunkara
-SENIOR
-News
-4.000000
-1
-2805
-Aaron Wank
-JUNIOR
-Editing
-3.240000
-1
-7401
-Allison Thompson
-SENIOR
-Computer Science
-3.800000
-54650
-25547
-Nicole Zedeck
-SENIOR
-Broadcast Journalism
-4.000000
-1308
-52773
-Emmas Sexton
-SOPHOMORE
-Film
-4.000000
-54650
-67914
-Clarisse Guevarra
-JUNIOR
-Sound
-3.400000
-54650
-96176
-Rachel Quayle
-SENIOR
-Screenwriting
-4.000000
-54650
-76291
-Candace Shih
-JUNIOR
-TV
-4.000000
-54650
-48193
+71717
 Reisz Davis
 SENIOR
 TV
-3.990000
-54650
-34830
-Devin Hoot
-SOPHOMORE
-TV
-3.500000
-1308
-24949
-Logan Welsh
-JUNIOR
-Computer Science
-3.800000
-54650
-17917
-Jon Kuntz
-SUPER SENIOR
-Film Production
-4.000000
-1308
+3.900000
+1
 2
 AJ Keenan
 SENIOR
-Broadcast Journalism
+Technical Direction
 3.850000
 1
 

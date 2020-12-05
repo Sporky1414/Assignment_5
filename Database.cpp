@@ -9,7 +9,7 @@ Database::Database() {
   studentFileHandler = new FileIO("studentTable.txt");
   facultyFileHandler = new FileIO("facultyTable.txt");
   bool isBlank = false;
-  if(studentFileHandler->hasInput()) {
+  if(studentFileHandler->hasInput() && facultyFileHandler->hasInput()) {
     while(studentFileHandler->inputHasDataLeft()) {
       string tempData = "";
       int tempID = 0;
@@ -34,7 +34,6 @@ Database::Database() {
           tempData += "\n";
         }
       }
-      cout << "EOFL" << endl;
       if(!isBlank) {
         studentRecord->insertNode(tempID, new Student(tempData));
       }
@@ -42,9 +41,7 @@ Database::Database() {
     }
     cout << "FOLLOWING STUDENT DATABSE LOADED FROM FILE: " << endl;
     printDatabaseToConsole(true);
-  }
-  isBlank = false;
-  if(facultyFileHandler->hasInput()) {
+    isBlank = false;
     while(facultyFileHandler->inputHasDataLeft()) {
       string tempData = "";
       int tempID = 0;
@@ -151,10 +148,10 @@ void Database::printAdviseesOfFaculty(int facultyID) {
   }
 }
 
-void Database::addStudent() {
+Student* Database::addStudent() {
   if(facultyRecord->isEmpty()) {
     cout << "ERROR: CAN NOT ADD STUDENT IF THERE IS NO ONE TO TEACH THEM! PLEASE TRY AGAIN." << endl;
-    return;
+    return NULL;
   }
   int tempID = 2;
   while(studentRecord->searchNode(tempID) || facultyRecord->searchNode(tempID)) {
@@ -168,9 +165,10 @@ void Database::addStudent() {
   Student* tempStudent = studentRecord->getDataOfNodeFromKey(tempID);
   Faculty* tempFaculty = facultyRecord->getDataOfNodeFromKey(tempFacultyID);
   tempFaculty->addStudentAdvisee(tempStudent);
+  return tempStudent;
 }
 
-void Database::addFaculty() {
+Faculty* Database::addFaculty() {
   int tempID = 1;
   while(studentRecord->searchNode(tempID) || facultyRecord->searchNode(tempID)) {
     tempID = 1 + rand()/((RAND_MAX)/100000);
@@ -179,6 +177,26 @@ void Database::addFaculty() {
   string tempName = "";
   getline(cin, tempName);
   facultyRecord->insertNode(tempID, new Faculty(tempID, tempName));
+  return facultyRecord->getDataOfNodeFromKey(tempID);
+}
+
+int Database::determineAdvisor(int oldAdvisor) {
+  LinkedList<int>* keysInOrder = facultyRecord->getListOfKeysInOrder();
+  int idOfMin = keysInOrder->valueAt(0);
+  int minAdvisees = studentRecord->getNumOfKeys();
+  int tempID = 0;
+  while(!keysInOrder->isEmpty()) {
+    tempID = keysInOrder->remove(keysInOrder->valueAt(0));
+    Faculty* tempFaculty = facultyRecord->getDataOfNodeFromKey(tempID);
+    ListADT<int>* tempListOfAdvisees = tempFaculty->getListOfStudentAdviseeIDs();
+    if(minAdvisees > tempListOfAdvisees->getLength() && tempID != oldAdvisor) {
+      idOfMin = tempID;
+      minAdvisees = tempListOfAdvisees->getLength();
+    }
+    delete tempListOfAdvisees;
+  }
+  delete keysInOrder;
+  return idOfMin;
 }
 
 int Database::determineAdvisor() {
@@ -218,7 +236,6 @@ Student* Database::deleteStudent(int studentID) {
     studentRecord->deleteNode(studentID);
     return tempStudent;
   } else {
-    cout << "Student does not exist. Returning NULL." << endl;
     return NULL;
   }
 }
@@ -226,7 +243,7 @@ Student* Database::deleteStudent(int studentID) {
 Faculty* Database::deleteFaculty(int facultyID) {
   if(facultyRecord->searchNode(facultyID)) {
     Faculty* tempFaculty = facultyRecord->getDataOfNodeFromKey(facultyID);
-    facultyRecord->deleteNode(facultyID);
+    Faculty* copyOfFaculty = new Faculty(to_string(*tempFaculty));
     LinkedList<int>* keysInOrder = studentRecord->getListOfKeysInOrder();
     int tempID = 0;
     while(!keysInOrder->isEmpty()) {
@@ -237,10 +254,11 @@ Faculty* Database::deleteFaculty(int facultyID) {
         changeAdvisorForStudent(tempID);
       }
     }
+    facultyRecord->deleteNode(facultyID);
+    tempFaculty = copyOfFaculty;
     delete keysInOrder;
     return tempFaculty;
   } else {
-    cout << "Faculty does not exist. Returning NULL." << endl;
     return NULL;
   }
 }
@@ -249,7 +267,7 @@ void Database::changeAdvisorForStudent(int studentID) {
   if(studentRecord->searchNode(studentID)) {
     Student* tempStudent = studentRecord->getDataOfNodeFromKey(studentID);
     while(true) {
-      cout << "Do you wish to assign this student's new advisor manually or automatically? Type '1' for manually or '2' for automatically." << endl;
+      cout << "Do you wish to assign this student's new advisor manually or randomly? Type '1' for manually or '2' for randomly." << endl;
       string tempResponse = "";
       getline(cin, tempResponse);
       if(studentFileHandler->checkIfStringIsNumber(tempResponse)) {
@@ -267,7 +285,11 @@ void Database::changeAdvisorForStudent(int studentID) {
               ss >> facultyAdvisorID;
               ss.clear();
               if(facultyRecord->searchNode(facultyAdvisorID)) {
+                Faculty* tempFaculty = searchForFaculty(tempStudent->getFacultyAdvisorID());
+                tempFaculty->deleteStudentFromAdviseeList(tempStudent->getID());
                 tempStudent->setNewAdvisor(facultyAdvisorID);
+                tempFaculty = searchForFaculty(facultyAdvisorID);
+                tempFaculty->addStudentAdvisee(tempStudent);
                 break;
               } else {
                 cout << "Number input does not correspond with a faculty member. Please try again." << endl;
@@ -278,7 +300,12 @@ void Database::changeAdvisorForStudent(int studentID) {
           }
           break;
         } else if (tempInt == 2) {
-          tempStudent->setNewAdvisor(determineAdvisor());
+          Faculty* tempFaculty = searchForFaculty(tempStudent->getFacultyAdvisorID());
+          tempFaculty->deleteStudentFromAdviseeList(tempStudent->getID());
+          int facultyAdvisorID = determineAdvisor(tempFaculty->getID());
+          tempStudent->setNewAdvisor(facultyAdvisorID);
+          tempFaculty = searchForFaculty(facultyAdvisorID);
+          tempFaculty->addStudentAdvisee(tempStudent);
           break;
         } else {
           cout << "Invalid Number given. Please try again." << endl;
@@ -288,7 +315,7 @@ void Database::changeAdvisorForStudent(int studentID) {
       }
     }
   } else {
-    cout << "STUDENT " << studentID << " DOES NOT EXIST." << endl;
+    cout << "STUDENT " << studentID << " DOES NOT EXIST. Returning to main menu." << endl;
   }
 }
 
@@ -300,9 +327,22 @@ void Database::removeAdviseeFromFaculty(int facultyID, int studentID) {
       tempFaculty->deleteStudentFromAdviseeList(studentID);
     }
     delete tempList;
-    cout << "Student removed from Faculty Advisee List. You now must reassign the student." << endl;
+    cout << "Student removed from " << tempFaculty->getName() << "'s Faculty Advisee List. You now must reassign the student." << endl;
     changeAdvisorForStudent(studentID);
   } else {
-    cout << "ERROR: FACULTY ID OR STUDENT ID DO NOT POINT TO A VALID STUDENT. PLEASE TRY AGAIN." << endl;
+    cout << "ERROR: FACULTY ID DOES NOT POINT TO AN EXISTING FACULTY OR STUDENT ID DO NOT POINT TO A VALID STUDENT. Returning to main menu." << endl;
   }
+}
+
+bool Database::studentRecordHasData() {
+  return !studentRecord->isEmpty();
+}
+
+bool Database::facultyRecordHasData() {
+  return !facultyRecord->isEmpty();
+}
+
+bool Database::facultyRecordHasMoreThanOneFaculty() {
+  int keysOfTree = facultyRecord->getNumOfKeys();
+  return keysOfTree > 1;
 }

@@ -72,11 +72,9 @@ bool FileIO::checkInputFileValidity() {
       string tempString = "";
       for(int i = 0; i < 6; ++i) {
         tempString = readNextLine();
-        if(tempString == "") {
-          i--;
-          if(inputHasDataLeft()) {
-            continue;
-          } else {
+        if (tempString == "" && inputHasDataLeft()) {
+          tempString = readNextLine();
+          if(tempString == "") {
             break;
           }
         }
@@ -119,19 +117,16 @@ bool FileIO::checkInputFileValidity() {
     }
     input.clear();
     input.seekg(0);
-    cout << "POSITION RESET STUDENT" << endl;
   } else {
     while(inputHasDataLeft()) {
       string tempString = "";
       int lengthOfList = 0;
       for(int i = 0; i < 6; ++i) {
         tempString = readNextLine();
-        if(tempString == "") {
-          i--;
-          if(inputHasDataLeft()) {
-            continue;
-          } else {
-            i = 8;
+        if (tempString == "" && inputHasDataLeft()) {
+          tempString = readNextLine();
+          if(tempString == "") {
+            break;
           }
         }
         switch(i) {
@@ -185,7 +180,6 @@ bool FileIO::checkInputFileValidity() {
     }
     input.clear();
     input.seekg(0);
-    cout << "POSITION RESET FACULTY" << endl;
   }
   return true;
 }

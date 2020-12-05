@@ -20,8 +20,6 @@ Student::Student(int studentID, string nameOfStudent, int originalFacultyAdvisor
 
 //File Validity Checked in FileIO, so the string being input will be in correct format for this to work.
 Student::Student(string dataFromFile) {
-  cout << "DATA FROM FILE TO MAKE A STUDENT OUT OF: " << endl;
-  cout << dataFromFile << endl;
   stringstream readingData(dataFromFile);
   string tempString = "";
   getline(readingData, tempString);

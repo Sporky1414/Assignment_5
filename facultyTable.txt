@@ -2,23 +2,7 @@
 Bret Marcus
 ASSOCIATE PROFESSOR
 Dodge College
-3
 2
-2805
-2013
-54650
-Suzanne Lysak
-ASSISTANT PROFESSOR
-Dodge College
 2
-48193
-96176
-1308
-Michael Fahy
-DISTINGUISHED PROFESSOR
-Computer Science
-3
-25547
-17917
-34830
+71717
 

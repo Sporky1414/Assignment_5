@@ -19,8 +19,6 @@ Faculty::Faculty(int facultyID, string facultyName) {
 }
 
 Faculty::Faculty(string dataFromFile) {
-  cout << "DATA FROM FILE TO MAKE A FACULTY OUT OF: " << endl;
-  cout << dataFromFile << endl;
   stringstream readingData(dataFromFile);
   string tempString = "";
   getline(readingData, tempString);

@@ -14,12 +14,16 @@ class Database {
     Faculty* searchForFaculty(int facultyID);
     void printAdvisorOfStudent(int studentID);
     void printAdviseesOfFaculty(int facultyID);
-    void addStudent();
-    void addFaculty();
+    Student* addStudent();
+    Faculty* addFaculty();
     Student* deleteStudent(int studentID);
     Faculty* deleteFaculty(int facultyID);
     void changeAdvisorForStudent(int studentID);
     void removeAdviseeFromFaculty(int facultyID, int studentID);
+
+    bool studentRecordHasData();
+    bool facultyRecordHasData();
+    bool facultyRecordHasMoreThanOneFaculty();
 
   private:
     BST<Student*>* studentRecord;
@@ -27,5 +31,6 @@ class Database {
     FileIO* studentFileHandler;
     FileIO* facultyFileHandler;
 
+    int determineAdvisor(int oldAdvisor);
     int determineAdvisor();
 };
