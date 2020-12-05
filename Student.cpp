@@ -20,6 +20,8 @@ Student::Student(int studentID, string nameOfStudent, int originalFacultyAdvisor
 
 //File Validity Checked in FileIO, so the string being input will be in correct format for this to work.
 Student::Student(string dataFromFile) {
+  cout << "DATA FROM FILE TO MAKE A STUDENT OUT OF: " << endl;
+  cout << dataFromFile << endl;
   stringstream readingData(dataFromFile);
   string tempString = "";
   getline(readingData, tempString);
@@ -28,6 +30,7 @@ Student::Student(string dataFromFile) {
   stringToNum.clear();
   getline(readingData, name);
   getline(readingData, level);
+  getline(readingData, major);
   tempString = "";
   getline(readingData, tempString);
   stringToNum.str(tempString);
@@ -61,7 +64,7 @@ void Student::setLevel() {
   while(true) {
     cout << "Enter the grade of the student (Freshman, Sophomore, Junior, Senior, or Super Senior)." << endl;
     string tempLevel = "";
-    cin >> tempLevel;
+    getline(cin, tempLevel);
     level = "";
     for(int i = 0; i < tempLevel.length(); ++i) {
       level += toupper(tempLevel[i]);
@@ -79,8 +82,15 @@ string Student::getMajor() {
 }
 
 void Student::setMajor() {
-  cout << "Enter the major for the student." << endl;
-  cin >> major;
+  while(true) {
+    cout << "Enter the major for the student." << endl;
+    getline(cin, major);
+    if(major != "") {
+      break;
+    } else {
+      cout << "Nothing entered. Please try again." << endl;
+    }
+  }
 }
 
 double Student::getGPA() {
@@ -88,7 +98,8 @@ double Student::getGPA() {
 }
 
 void Student::setGPA() {
-  while(true) {
+  bool isFinished = false;
+  while(!isFinished) {
     cout << "Enter the student's GPA." << endl;
     string tempGPA = "";
     getline(cin, tempGPA);
@@ -108,10 +119,23 @@ void Student::setGPA() {
     }
     if(isNum) {
       stringstream stringToNum(tempGPA);
-      stringToNum >> gpa;
-      break;
+      double tempGPANum = 0;
+      stringToNum >> tempGPANum;
+      if(tempGPANum < 0.0) {
+        cout << "ERROR: The GPA you entered is less than 0. Please try again." << endl;
+        stringToNum.clear();
+      } else if (tempGPANum > 4.0) {
+        cout << "ERROR: The GPA you entered is greater than 4. Please try again." << endl;
+        stringToNum.clear();
+      } else {
+        gpa = tempGPANum;
+        stringToNum.clear();
+      }
     } else {
       cout << "ERROR: Number not entered. Please try again." << endl;
+    }
+    if(gpa != 0) {
+      isFinished = true;
     }
   }
 }
@@ -151,47 +175,48 @@ bool Student::operator <(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Student") {
     return true;
   }
-  return getLevelNumber(level) < getLevelNumber(otherPerson.level);
+  return id < otherPerson.id;
 }
 
 bool Student::operator >(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Student") {
     return false;
   }
-  return getLevelNumber(level) > getLevelNumber(otherPerson.level);
+  return id > otherPerson.id;
 }
 
 bool Student::operator <=(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Student") {
     return true;
   }
-  return getLevelNumber(level) <= getLevelNumber(otherPerson.level);
+  return id <= otherPerson.id;
 }
 
 bool Student::operator >=(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Student") {
     return false;
   }
-  return getLevelNumber(level) >= getLevelNumber(otherPerson.level);
+  return id >= otherPerson.id;
 }
 
 ostream &operator <<(ostream &out, Student &student) {
-  out << "STUDENT ID: " << to_string(student.getID()) << "\n";
-  out << "STUDENT NAME: " << student.getName() << "\n";
-  out << "STUDENT LEVEL: " << student.getLevel() << "\n";
-  out << "STUDENT MAJOR: " << student.getMajor() << "\n";
-  out << "STUDENT GPA: " << setprecision(4) << student.getGPA() << "\n";
-  out << "STUDENT'S FACULTY ADVISOR'S ID: " << to_string(student.getFacultyAdvisorID()) << endl;
+  string tempString = to_string(student.id) + "\n" + student.name + "\n" + student.level + "\n" + student.major + "\n" + to_string(student.gpa) + "\n" + to_string(student.facultyAdvisor) + "\n";
+  out << tempString;
   return out;
 }
 
-string to_string(Student &student) {
+string to_string(Student student) {
   ostringstream ss;
   ss << student;
   return ss.str();
 }
 
-string Student::getDataForFile() {
-  string returnString = to_string(id) + "\n" + name + "\n" + level + "\n" + major + "\n" + to_string(gpa) + "\n" + to_string(facultyAdvisor) + "\n";
+string Student::printDataForUser() {
+  string returnString = "STUDENT ID: " + to_string(id) + "\n";
+  returnString += "STUDENT NAME: " + name + "\n";
+  returnString += "STUDENT LEVEL: " + level + "\n";
+  returnString += "STUDENT MAJOR: " + major + "\n";
+  returnString += "STUDENT GPA: "  + to_string(gpa) + "\n";
+  returnString += "STUDENT'S FACULTY ADVISOR'S ID: " + to_string(facultyAdvisor) + "\n";
   return returnString;
 }

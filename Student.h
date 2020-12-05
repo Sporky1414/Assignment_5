@@ -27,9 +27,9 @@ class Student: private Person {
     bool operator <=(const Person& otherPerson);
 
     friend ostream &operator<<(ostream &out, Student &student);
-    friend string to_string(Student &student);
+    friend string to_string(Student student);
 
-    string getDataForFile();
+    string printDataForUser();
 
   private:
     string major;

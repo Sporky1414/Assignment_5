@@ -1,42 +1,55 @@
 #include "TreeNode.cpp"
+#include "LinkedList.cpp"
 
 using namespace std;
 
 template <class T>
 
 class BST {
-  private:
-    TreeNode<T>* root;
-
   public:
     BST();
     ~BST();
 
-    void insertNode(T data);
-    bool searchNode(T data);
-    bool deleteNode(T data);
+    void insertNode(int key, T data);
+    bool searchNode(int key);
+    bool deleteNode(int key);
+
+    T getDataOfNodeFromKey(int key);
 
     bool isEmpty();
-    T getMax();
-    T getMin();
+    int getMax();
+    int getMin();
     int getHeightOfTree();
-    int getHeightOfSubtree(T dataOfRootForSubtree);
-    string printInOrder();
-    string printPreOrder();
-    string printPostOrder();
+    int getHeightOfSubtree(int keyOfRootForSubtree);
+    int getNumOfKeys();
+    string printInOrderRef();
+    string printInOrderPointer();
+    string printPreOrderRef();
+    string printPreOrderPointer();
+    string printPostOrderRef();
+    string printPostOrderPointer();
+    LinkedList<int>* getListOfKeysInOrder();
 
 
 
   private:
-    TreeNode<T>* getNodeWithData(T data);
+    TreeNode<T>* root;
+    int numOfKeys;
+
+    TreeNode<T>* getNodeWithKey(int key);
+    string printInOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer);
     string printInOrderRec(TreeNode<T>* nodeToStart);
+    string printPreOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer);
     string printPreOrderRec(TreeNode<T>* nodeToStart);
+    string printPostOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer);
     string printPostOrderRec(TreeNode<T>* nodeToStart);
+    void getListOfKeysInOrderRec(LinkedList<int>* keyList, TreeNode<T>* nodeToStart);
     int getHeightOfTreeRec(TreeNode<T>* rootNodeForSubtree);
 };
 
 template <class T>
 BST<T>::BST() {
+  numOfKeys = 0;
   root = NULL;
 }
 
@@ -51,11 +64,11 @@ bool BST<T>::isEmpty() {
 }
 
 template <class T>
-T BST<T>::getMax() {
+int BST<T>::getMax() {
   //looking for rightmost TreeNode
 
   if(isEmpty()) {
-    return T();
+    return -1;
   }
 
   TreeNode<T>* current = root;
@@ -68,9 +81,9 @@ T BST<T>::getMax() {
 }
 
 template <class T>
-T BST<T>::getMin() {
+int BST<T>::getMin() {
   if(isEmpty()) {
-    return T();
+    return -1;
   }
 
   TreeNode<T>* current = root;
@@ -83,8 +96,13 @@ T BST<T>::getMin() {
 }
 
 template <class T>
-void BST<T>::insertNode(T value) {
-  TreeNode<T>* node = new TreeNode<T>(value);
+int BST<T>::getNumOfKeys() {
+  return numOfKeys;
+}
+
+template <class T>
+void BST<T>::insertNode(int key, T data) {
+  TreeNode<T>* node = new TreeNode<T>(key, data);
 
   if(isEmpty()) {
     //empty Tree
@@ -97,7 +115,7 @@ void BST<T>::insertNode(T value) {
     while(true) {
       parent = current;
 
-      if(value < current->key) {
+      if(key < current->key) {
         //go left
         current = current->left;
         if(current == NULL) {
@@ -116,18 +134,19 @@ void BST<T>::insertNode(T value) {
       }
     }
   }
+  ++numOfKeys;
 }
 
 template <class T>
-bool BST<T>::searchNode(T value) {
+bool BST<T>::searchNode(int key) {
   if(isEmpty()) {
     return false;
   } else {
     //tree is not empty, let's go look for the value.
     TreeNode<T>* current = root;
 
-    while (current->key != value) {
-      if(value < current->key) {
+    while (current->key != key) {
+      if(key < current->key) {
         current = current->left;
       } else {
         current = current->right;
@@ -142,11 +161,32 @@ bool BST<T>::searchNode(T value) {
 }
 
 template <class T>
-bool BST<T>::deleteNode(T value) {
+T BST<T>::getDataOfNodeFromKey(int key) {
+  if(isEmpty()) {
+    return T();
+  } else {
+    TreeNode<T>* current = root;
+
+    while(current->key != key) {
+      if(key < current->key) {
+        current = current->left;
+      } else {
+        current = current->right;
+      }
+      if(current == NULL) {
+        return T();
+      }
+    }
+    return current->data;
+  }
+}
+
+template <class T>
+bool BST<T>::deleteNode(int key) {
   TreeNode<T>* parent = NULL;
   TreeNode<T>* current = root;
   while(current != NULL) {
-    if(current->key == value) {
+    if(current->key == key) {
       if(current->left == NULL && current->right == NULL) {
         if(parent == NULL) {
           root = NULL;
@@ -180,8 +220,9 @@ bool BST<T>::deleteNode(T value) {
           successor = successor->left;
           successorIsLeftChild = true;
         }
-        T successorData = successor->key;
-        if(successorData == current->key) {
+        T successorData = successor->data;
+        int successorKey = successor->key;
+        if(successorKey == current->key) {
           if(successorIsLeftChild) {
             successorParent->left = NULL;
           } else {
@@ -189,11 +230,13 @@ bool BST<T>::deleteNode(T value) {
           }
         } else {
           deleteNode(successor->key);
-          current->key = successorData;
+          current->key = successorKey;
+          current->data = successorData;
         }
       }
+      numOfKeys--;
       return true;
-    } else if (current->key < value) {
+    } else if (current->key < key) {
       parent = current;
       current = current->right;
     } else {
@@ -205,8 +248,26 @@ bool BST<T>::deleteNode(T value) {
 }
 
 template <class T>
-string BST<T>::printInOrder() {
+string BST<T>::printInOrderPointer() {
+  return printInOrderRec(root, is_pointer<T>::value);
+}
+
+template <class T>
+string BST<T>::printInOrderRef() {
   return printInOrderRec(root);
+}
+
+template <class T>
+string BST<T>::printInOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer) {
+  if(nodeToStart == NULL) {
+    return "";
+  }
+  string stringWithTree = "";
+  stringWithTree += printInOrderRec(nodeToStart->left, tIsPointer);
+  T tempData = nodeToStart->data;
+  stringWithTree += to_string(*tempData);
+  stringWithTree += printInOrderRec(nodeToStart->right, tIsPointer);
+  return stringWithTree;
 }
 
 template <class T>
@@ -216,9 +277,26 @@ string BST<T>::printInOrderRec(TreeNode<T>* nodeToStart) {
   }
   string stringWithTree = "";
   stringWithTree += printInOrderRec(nodeToStart->left);
-  stringWithTree += to_string(nodeToStart->key)+ "\n";
+  stringWithTree += to_string(nodeToStart->data);
   stringWithTree += printInOrderRec(nodeToStart->right);
   return stringWithTree;
+}
+
+template <class T>
+LinkedList<int>* BST<T>::getListOfKeysInOrder() {
+  LinkedList<int>* tempList = new LinkedList<int>();
+  getListOfKeysInOrderRec(tempList, root);
+  return tempList;
+}
+
+template <class T>
+void BST<T>::getListOfKeysInOrderRec(LinkedList<int>* keysList, TreeNode<T>* nodeToStart) {
+  if(nodeToStart == NULL) {
+    return;
+  }
+  getListOfKeysInOrderRec(keysList, nodeToStart->left);
+  keysList->append(nodeToStart->key);
+  getListOfKeysInOrderRec(keysList, nodeToStart->right);
 }
 
 template <class T>
@@ -227,8 +305,8 @@ int BST<T>::getHeightOfTree() {
 }
 
 template <class T>
-int BST<T>::getHeightOfSubtree(T dataOfRootForSubtree) {
-  return getHeightOfTreeRec(getNodeWithData(dataOfRootForSubtree));
+int BST<T>::getHeightOfSubtree(int key) {
+  return getHeightOfTreeRec(getNodeWithKey(key));
 }
 
 template <class T>
@@ -242,15 +320,15 @@ int BST<T>::getHeightOfTreeRec(TreeNode<T>* rootNodeForSubtree) {
 }
 
 template <class T>
-TreeNode<T>* BST<T>::getNodeWithData(T data) {
+TreeNode<T>* BST<T>::getNodeWithKey(int key) {
   if(isEmpty()) {
     return NULL;
   } else {
     //tree is not empty, let's go look for the value.
     TreeNode<T>* current = root;
 
-    while (current->key != data) {
-      if(data < current->key) {
+    while (current->key != key) {
+      if(key < current->key) {
         current = current->left;
       } else {
         current = current->right;
@@ -265,8 +343,30 @@ TreeNode<T>* BST<T>::getNodeWithData(T data) {
 }
 
 template <class T>
-string BST<T>::printPreOrder() {
+string BST<T>::printPreOrderPointer() {
+  return printPreOrderRec(root, is_pointer<T>::value);
+}
+
+template <class T>
+string BST<T>::printPreOrderRef() {
   return printPreOrderRec(root);
+}
+
+template <class T>
+string BST<T>::printPreOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer) {
+  if(nodeToStart == NULL) {
+    return "";
+  }
+  string stringToReturn = "";
+  if(!tIsPointer) {
+    stringToReturn += to_string(nodeToStart->data);
+  } else {
+    T tempData = nodeToStart->data;
+    stringToReturn += to_string(*tempData);
+  }
+  stringToReturn += printPreOrderRec(nodeToStart->left, tIsPointer);
+  stringToReturn += printPreOrderRec(nodeToStart->right, tIsPointer);
+  return stringToReturn;
 }
 
 template <class T>
@@ -274,15 +374,21 @@ string BST<T>::printPreOrderRec(TreeNode<T>* nodeToStart) {
   if(nodeToStart == NULL) {
     return "";
   }
-  string stringToReturn = to_string(nodeToStart->key) + "\n";
+  string stringToReturn = "";
+  stringToReturn += to_string(nodeToStart->data);
   stringToReturn += printPreOrderRec(nodeToStart->left);
   stringToReturn += printPreOrderRec(nodeToStart->right);
   return stringToReturn;
 }
 
 template <class T>
-string BST<T>::printPostOrder() {
+string BST<T>::printPostOrderRef() {
   return printPostOrderRec(root);
+}
+
+template <class T>
+string BST<T>::printPostOrderPointer() {
+  return printPostOrderRec(root, is_pointer<T>::value);
 }
 
 template <class T>
@@ -292,6 +398,18 @@ string BST<T>::printPostOrderRec(TreeNode<T>* nodeToStart) {
   }
   string stringToReturn = printPostOrderRec(nodeToStart->left);
   stringToReturn += printPostOrderRec(nodeToStart->right);
-  stringToReturn += to_string(nodeToStart->key) + "\n";
+  stringToReturn += to_string(nodeToStart->data);
+  return stringToReturn;
+}
+
+template <class T>
+string BST<T>::printPostOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer) {
+  if(nodeToStart == NULL) {
+    return "";
+  }
+  string stringToReturn = printPostOrderRec(nodeToStart->left, tIsPointer);
+  stringToReturn += printPostOrderRec(nodeToStart->right, tIsPointer);
+  T tempData = nodeToStart->data;
+  stringToReturn += to_string(*tempData);
   return stringToReturn;
 }

@@ -7,10 +7,11 @@ template <class T>
 class TreeNode {
   public:
     TreeNode();
-    TreeNode(T data);
+    TreeNode(int argKey, T argData);
     ~TreeNode();
 
-    T key;
+    int key;
+    T data;
     TreeNode<T>* left;
     TreeNode<T>* right;
     bool operator ==(const TreeNode<T>* otherNode);
@@ -20,14 +21,16 @@ template <class T>
 TreeNode<T>::TreeNode() {
   left = NULL;
   right = NULL;
-  key = T();
+  key = 0;
+  data = new T();
 }
 
 template <class T>
-TreeNode<T>::TreeNode(T data) {
+TreeNode<T>::TreeNode(int argKey, T argData) {
   left = NULL;
   right = NULL;
-  key = data;
+  key = argKey;
+  data = argData;
 }
 
 template <class T>

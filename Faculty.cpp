@@ -19,6 +19,8 @@ Faculty::Faculty(int facultyID, string facultyName) {
 }
 
 Faculty::Faculty(string dataFromFile) {
+  cout << "DATA FROM FILE TO MAKE A FACULTY OUT OF: " << endl;
+  cout << dataFromFile << endl;
   stringstream readingData(dataFromFile);
   string tempString = "";
   getline(readingData, tempString);
@@ -94,8 +96,15 @@ string Faculty::getDepartment() {
 }
 
 void Faculty::setDepartment() {
-  cout << "Enter the department the faculty member works for." << endl;
-  getline(cin, department);
+  while(true) {
+    cout << "Enter the department the faculty member works for." << endl;
+    getline(cin, department);
+    if(department != "") {
+      break;
+    } else {
+      cout << "Nothing was entered. Please try again." << endl;
+    }
+  }
 }
 
 int Faculty::getLevelNumber(string thisLevel) {
@@ -126,7 +135,8 @@ void Faculty::getPrintedListOfStudentAdviseeIDs() {
 }
 
 void Faculty::addStudentAdvisee(Student* student) {
-  listOfStudentAdviseeIDs->append(student->getID());
+  int tempId = student->getID();
+  listOfStudentAdviseeIDs->append(tempId);
 }
 
 int Faculty::deleteStudentFromAdviseeList(int studentID) {
@@ -144,39 +154,40 @@ bool Faculty::operator <(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Faculty") {
     return false;
   }
-  return getLevelNumber(level) < getLevelNumber(otherPerson.level);
+  return id < otherPerson.id;
 }
 
 bool Faculty::operator >(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Faculty") {
     return true;
   }
-  return getLevelNumber(level) > getLevelNumber(otherPerson.level);
+  return id > otherPerson.id;
 }
 
 bool Faculty::operator <=(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Faculty") {
     return false;
   }
-  return getLevelNumber(level) <= getLevelNumber(otherPerson.level);
+  return id <= otherPerson.id;
 }
 
 bool Faculty::operator >=(const Person& otherPerson) {
   if(typeid(otherPerson).name() != "Faculty") {
     return true;
   }
-  return getLevelNumber(level) >= getLevelNumber(otherPerson.level);
+  return id >= otherPerson.id;
 }
 
 ostream &operator<<(ostream &out, Faculty &faculty) {
-  out << "FACULTY ID: " << to_string(faculty.id) << endl;
-  out << "FACULTY NAME: " << faculty.name << endl;
-  out << "FACULTY LEVEL: " << faculty.level << endl;
-  out << "FACULTY DEPARTMENT: " << faculty.department << endl;
-  out << "STUDENT ID'S OF ALL ADVISEES: " << endl;
+  string returnString = to_string(faculty.id) + "\n";
+  returnString += faculty.name + "\n";
+  returnString += faculty.level + "\n";
+  returnString += faculty.department + "\n";
+  returnString += to_string(faculty.listOfStudentAdviseeIDs->getLength()) + "\n";
   for(int i = 0; i < faculty.listOfStudentAdviseeIDs->getLength(); ++i) {
-    out << "   " << to_string(faculty.listOfStudentAdviseeIDs->valueAt(i)) << endl;
+    returnString += to_string(faculty.listOfStudentAdviseeIDs->valueAt(i)) + "\n";
   }
+  out << returnString;
   return out;
 }
 
@@ -186,14 +197,22 @@ string to_string(Faculty &faculty) {
   return ss.str();
 }
 
-string Faculty::getDataForFile() {
-  string returnString = to_string(id) + "\n";
-  returnString += name + "\n";
-  returnString += level + "\n";
-  returnString += department + "\n";
-  returnString += to_string(listOfStudentAdviseeIDs->getLength()) + "\n";
+string Faculty::printDataForUser() {
+  string returnString = "FACULTY ID: " + to_string(id) + "\n";
+  returnString += "FACULTY NAME: " + name + "\n";
+  returnString += "FACULTY LEVEL: " + level + "\n";
+  returnString += "FACULTY DEPARTMENT: " + department + "\n";
+  returnString += "STUDENT ID'S OF ALL ADVISEES: \n";
   for(int i = 0; i < listOfStudentAdviseeIDs->getLength(); ++i) {
-    returnString += to_string(listOfStudentAdviseeIDs->valueAt(i)) + "\n";
+    returnString += "   " + to_string(listOfStudentAdviseeIDs->valueAt(i)) + "\n";
   }
   return returnString;
+}
+
+ListADT<int>* Faculty::getListOfStudentAdviseeIDs() {
+  ListADT<int>* newList = new LinkedList<int>();
+  for(int i = 0; i < listOfStudentAdviseeIDs->getLength(); ++i) {
+    newList->append(listOfStudentAdviseeIDs->valueAt(i));
+  }
+  return newList;
 }

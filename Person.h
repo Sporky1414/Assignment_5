@@ -23,7 +23,7 @@ class Person {
     virtual bool operator >=(const Person& otherPerson) = 0;
     virtual bool operator <=(const Person& otherPerson) = 0;
 
-    virtual string getDataForFile() = 0;
+    virtual string printDataForUser() = 0;
 
     string level;
     int id;

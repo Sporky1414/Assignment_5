@@ -1,5 +1,5 @@
 #include "Student.h"
-#include "LinkedList.cpp"
+#include "BST.cpp"
 
 using namespace std;
 
@@ -19,6 +19,7 @@ class Faculty: private Person {
     void getPrintedListOfStudentAdviseeIDs();
     void addStudentAdvisee(Student* student);
     int deleteStudentFromAdviseeList(int studentID);
+    ListADT<int>* getListOfStudentAdviseeIDs();
 
     bool operator ==(const Person& otherPerson);
     bool operator <(const Person& otherPerson);
@@ -29,7 +30,7 @@ class Faculty: private Person {
     friend ostream &operator<<(ostream &out, Faculty &faculty);
     friend string to_string(Faculty &faculty);
 
-    string getDataForFile();
+    string printDataForUser();
 
   private:
     string department;
