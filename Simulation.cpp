@@ -4,6 +4,7 @@ using namespace std;
 
 Simulation::Simulation() {
   database = new Database();
+  backups = new Rollback();
 }
 
 Simulation::~Simulation() {
@@ -15,7 +16,7 @@ void Simulation::run() {
   cout << "To make a selection of what you wish to do, type in the corresponding number of the command you wish to execute." << endl;
   bool isFinished = false;
   while(!isFinished) {
-    cout << "Make your selection now!" << endl;
+    cout << "\n\nMake your selection now!" << endl;
     cout << "1. Print all students and their information." << endl;
     cout << "2. Print all faculty and their information." << endl;
     cout << "3. Display Student Information from ID." << endl;
@@ -69,7 +70,11 @@ void Simulation::run() {
           deleteFaculty();
           break;
         case 11:
-          changeAdvisorForStudent();
+          if(!database->studentRecordHasData() || !database->facultyRecordHasData()) {
+            cout << "You do not have any students and/or faculty present. Please add data before trying this." << endl;
+          } else {
+            changeAdvisorForStudent();
+          }
           break;
         case 12:
           removeAdviseeFromFaculty();
@@ -223,6 +228,11 @@ void Simulation::printAdviseesOfFaculty() {
 }
 
 void Simulation::addStudent() {
+  if(!database->facultyRecordHasData()) {
+    cout << "Can not add students if there is no faculty present. Please add faculty then try again." << endl;
+    return;
+  }
+  prepBackup();
   cout << "Preparing to add student. ID Number is randomly generated. Faculty Advisor is also randomly assigned. You can reassign the faculty advisor from the main menu." << endl;
   Student* tempStudent = database->addStudent();
   if(tempStudent != NULL) {
@@ -231,6 +241,7 @@ void Simulation::addStudent() {
 }
 
 void Simulation::addFaculty() {
+  prepBackup();
   cout << "Preparing to add faculty." << endl;
   Faculty* tempFaculty = database->addFaculty();
   cout << "Faculty added with following data: \n" << tempFaculty->printDataForUser() << endl;
@@ -253,6 +264,7 @@ void Simulation::deleteStudent() {
     }
     switch(selection) {
       case 1: {
+        prepBackup();
         int tempID = 0;
         while(true) {
           cout << "Enter the ID number of the student to delete." << endl;
@@ -262,8 +274,7 @@ void Simulation::deleteStudent() {
           } else {
             Student* tempStudent = database->deleteStudent(tempID);
             if(tempStudent == NULL) {
-              cout << "Student with ID number " << tempID << " does not exist. Returning to main menu." << endl;
-              return;
+              cout << "Student with ID number " << tempID << " does not exist. Please try again." << endl;
             } else {
               cout << "The student with the following information has been deleted: " << endl;
               cout << tempStudent->printDataForUser() << endl;
@@ -305,6 +316,7 @@ void Simulation::deleteFaculty() {
     }
     switch(selection) {
       case 1: {
+        prepBackup();
         int tempID = 0;
         while(true) {
           cout << "Enter the ID number of the faculty member to delete." << endl;
@@ -314,8 +326,7 @@ void Simulation::deleteFaculty() {
           } else {
             Faculty* tempFaculty = database->deleteFaculty(tempID);
             if(tempFaculty == NULL) {
-              cout << "Faculty member with ID number " << tempID << " does not exist. Returning to main menu." << endl;
-              return;
+              cout << "Faculty member with ID number " << tempID << " does not exist. PLease try again." << endl;
             } else {
               cout << "The faculty member with the following information has been deleted: " << endl;
               cout << tempFaculty->printDataForUser() << endl;
@@ -337,10 +348,7 @@ void Simulation::deleteFaculty() {
 }
 
 void Simulation::changeAdvisorForStudent() {
-  if(!database->studentRecordHasData() || !database->facultyRecordHasData()) {
-    cout << "You do not have any students and/or faculty present. Please add data before trying this." << endl;
-    return;
-  }
+  prepBackup();
   while(true) {
     cout << "Enter ID of student to change the advisor of." << endl;
     int tempID = getNumResponse();
@@ -358,6 +366,7 @@ void Simulation::removeAdviseeFromFaculty() {
     cout << "You do not have any students and/or faculty present. Please add data before trying this." << endl;
     return;
   }
+  prepBackup();
   while(true) {
     cout << "Enter the ID number of the faculty member who is losing an advisee." << endl;
     int tempFacultyID = getNumResponse();
@@ -379,7 +388,7 @@ void Simulation::removeAdviseeFromFaculty() {
 }
 
 void Simulation::rollback() {
-  cout << "COMING SOON" << endl;
+  restoreBackup();
 }
 
 int Simulation::getNumResponse() {
@@ -393,5 +402,23 @@ int Simulation::getNumResponse() {
     return tempNum;
   } else {
     return -1;
+  }
+}
+
+void Simulation::prepBackup() {
+  BackupDatabase* newBackup = new BackupDatabase(database->copyStudentRecord(), database->copyFacultyRecord());
+  backups->addNewBackup(newBackup);
+}
+
+void Simulation::restoreBackup() {
+  if(backups->backupsArePresent()) {
+    cout << "RESTORING TO PREVIOUS STATE OF DATABSE." << endl;
+    BackupDatabase* backup = backups->restoreBackup();
+    backup->backupStudentRecord = database->restoreStudentRecord(backup->backupStudentRecord);
+    backup->backupFacultyRecord = database->restoreFacultyRecord(backup->backupFacultyRecord);
+    delete backup;
+    cout << "Number of Rollback States Left: " << backups->getNumOfBackupsStored() << endl;
+  } else {
+    cout << "No backups present to restore from." << endl;
   }
 }

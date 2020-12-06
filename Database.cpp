@@ -264,73 +264,115 @@ Faculty* Database::deleteFaculty(int facultyID) {
 }
 
 void Database::changeAdvisorForStudent(int studentID) {
-  if(studentRecord->searchNode(studentID)) {
-    Student* tempStudent = studentRecord->getDataOfNodeFromKey(studentID);
-    while(true) {
-      cout << "Do you wish to assign this student's new advisor manually or randomly? Type '1' for manually or '2' for randomly." << endl;
-      string tempResponse = "";
-      getline(cin, tempResponse);
-      if(studentFileHandler->checkIfStringIsNumber(tempResponse)) {
-        int tempInt = 0;
-        stringstream ss(tempResponse);
-        ss >> tempInt;
-        ss.clear();
-        int facultyAdvisorID = 0;
-        if(tempInt == 1) {
-          while (true) {
-            cout << "Enter the ID number of the new faculty advisor." << endl;
-            getline(cin, tempResponse);
-            if(studentFileHandler->checkIfStringIsNumber(tempResponse)) {
-              ss.str(tempResponse);
-              ss >> facultyAdvisorID;
-              ss.clear();
-              if(facultyRecord->searchNode(facultyAdvisorID)) {
-                Faculty* tempFaculty = searchForFaculty(tempStudent->getFacultyAdvisorID());
-                tempFaculty->deleteStudentFromAdviseeList(tempStudent->getID());
-                tempStudent->setNewAdvisor(facultyAdvisorID);
-                tempFaculty = searchForFaculty(facultyAdvisorID);
-                tempFaculty->addStudentAdvisee(tempStudent);
-                break;
+  while(true) {
+    if(studentRecord->searchNode(studentID)) {
+      Student* tempStudent = studentRecord->getDataOfNodeFromKey(studentID);
+      while(true) {
+        cout << "Do you wish to assign this student's new advisor manually or randomly? Type '1' for manually or '2' for randomly." << endl;
+        string tempResponse = "";
+        getline(cin, tempResponse);
+        if(studentFileHandler->checkIfStringIsNumber(tempResponse)) {
+          int tempInt = 0;
+          stringstream ss(tempResponse);
+          ss >> tempInt;
+          ss.clear();
+          int facultyAdvisorID = 0;
+          if(tempInt == 1) {
+            while (true) {
+              cout << "Enter the ID number of the new faculty advisor." << endl;
+              getline(cin, tempResponse);
+              if(studentFileHandler->checkIfStringIsNumber(tempResponse)) {
+                ss.str(tempResponse);
+                ss >> facultyAdvisorID;
+                ss.clear();
+                if(facultyRecord->searchNode(facultyAdvisorID)) {
+                  Faculty* tempFaculty = searchForFaculty(tempStudent->getFacultyAdvisorID());
+                  tempFaculty->deleteStudentFromAdviseeList(tempStudent->getID());
+                  tempStudent->setNewAdvisor(facultyAdvisorID);
+                  tempFaculty = searchForFaculty(facultyAdvisorID);
+                  tempFaculty->addStudentAdvisee(tempStudent);
+                  break;
+                } else {
+                  cout << "Number input does not correspond with a faculty member. Please try again." << endl;
+                }
               } else {
-                cout << "Number input does not correspond with a faculty member. Please try again." << endl;
+                cout << "Input was not a number. Please try again." << endl;
               }
-            } else {
-              cout << "Input was not a number. Please try again." << endl;
             }
+            break;
+          } else if (tempInt == 2) {
+            Faculty* tempFaculty = searchForFaculty(tempStudent->getFacultyAdvisorID());
+            tempFaculty->deleteStudentFromAdviseeList(tempStudent->getID());
+            int facultyAdvisorID = determineAdvisor(tempFaculty->getID());
+            tempStudent->setNewAdvisor(facultyAdvisorID);
+            tempFaculty = searchForFaculty(facultyAdvisorID);
+            tempFaculty->addStudentAdvisee(tempStudent);
+            break;
+          } else {
+            cout << "Invalid Number given. Please try again." << endl;
           }
-          break;
-        } else if (tempInt == 2) {
-          Faculty* tempFaculty = searchForFaculty(tempStudent->getFacultyAdvisorID());
-          tempFaculty->deleteStudentFromAdviseeList(tempStudent->getID());
-          int facultyAdvisorID = determineAdvisor(tempFaculty->getID());
-          tempStudent->setNewAdvisor(facultyAdvisorID);
-          tempFaculty = searchForFaculty(facultyAdvisorID);
-          tempFaculty->addStudentAdvisee(tempStudent);
-          break;
         } else {
-          cout << "Invalid Number given. Please try again." << endl;
+          cout << "Number not entered. Please try again." << endl;
         }
-      } else {
-        cout << "Number not entered. Please try again." << endl;
+      }
+      break;
+    } else {
+      cout << "STUDENT " << studentID << " DOES NOT EXIST. Please try a different ID." << endl;
+      string response = "";
+      while(true) {
+        cout << "Enter ID of student to change the advisor of." << endl;
+        getline(cin, response);
+        if(studentFileHandler->checkIfStringIsNumber(response)) {
+          stringstream ss(response);
+          ss >> studentID;
+          ss.clear();
+        } else {
+          cout << "You did not enter a number. Please try again." << endl;
+        }
       }
     }
-  } else {
-    cout << "STUDENT " << studentID << " DOES NOT EXIST. Returning to main menu." << endl;
   }
 }
 
 void Database::removeAdviseeFromFaculty(int facultyID, int studentID) {
-  if(facultyRecord->searchNode(facultyID) && studentRecord->searchNode(studentID)) {
-    Faculty* tempFaculty = facultyRecord->getDataOfNodeFromKey(facultyID);
-    ListADT<int>* tempList = tempFaculty->getListOfStudentAdviseeIDs();
-    if(tempList->searchFor(studentID) > -1) {
-      tempFaculty->deleteStudentFromAdviseeList(studentID);
+  while(true) {
+    if(facultyRecord->searchNode(facultyID) && studentRecord->searchNode(studentID)) {
+      Faculty* tempFaculty = facultyRecord->getDataOfNodeFromKey(facultyID);
+      ListADT<int>* tempList = tempFaculty->getListOfStudentAdviseeIDs();
+      if(tempList->searchFor(studentID) > -1) {
+        tempFaculty->deleteStudentFromAdviseeList(studentID);
+      }
+      delete tempList;
+      cout << "Student removed from " << tempFaculty->getName() << "'s Faculty Advisee List. You now must reassign the student." << endl;
+      changeAdvisorForStudent(studentID);
+      break;
+    } else {
+      cout << "ERROR: FACULTY ID DOES NOT POINT TO AN EXISTING FACULTY OR STUDENT ID DO NOT POINT TO A VALID STUDENT. Please Try Again." << endl;
+      string response;
+      while(true) {
+        cout << "Enter the ID of the faculty member to remove the advisee from." << endl;
+        getline(cin, response);
+        if(studentFileHandler->checkIfStringIsNumber(response)) {
+          stringstream ss(response);
+          ss >> facultyID;
+          ss.clear();
+        } else {
+          cout << "You did not enter a number. Please try again." << endl;
+        }
+      }
+      response = "";
+      while(true) {
+        cout << "Enter ID of student to remove from this advisor." << endl;
+        getline(cin, response);
+        if(studentFileHandler->checkIfStringIsNumber(response)) {
+          stringstream ss(response);
+          ss >> studentID;
+          ss.clear();
+        } else {
+          cout << "You did not enter a number. Please try again." << endl;
+        }
+      }
     }
-    delete tempList;
-    cout << "Student removed from " << tempFaculty->getName() << "'s Faculty Advisee List. You now must reassign the student." << endl;
-    changeAdvisorForStudent(studentID);
-  } else {
-    cout << "ERROR: FACULTY ID DOES NOT POINT TO AN EXISTING FACULTY OR STUDENT ID DO NOT POINT TO A VALID STUDENT. Returning to main menu." << endl;
   }
 }
 
@@ -345,4 +387,45 @@ bool Database::facultyRecordHasData() {
 bool Database::facultyRecordHasMoreThanOneFaculty() {
   int keysOfTree = facultyRecord->getNumOfKeys();
   return keysOfTree > 1;
+}
+
+BST<Student*>* Database::copyStudentRecord() {
+  BST<Student*>* copy = new BST<Student*>();
+  LinkedList<int>* listOfKeys = studentRecord->getListOfKeysPostOrder();
+  int tempID = 0;
+  while(!listOfKeys->isEmpty()) {
+    tempID = listOfKeys->remove(listOfKeys->valueAt(0));
+    Student* tempStudent = studentRecord->getDataOfNodeFromKey(tempID);
+    string dataToCopy = to_string(*tempStudent);
+    tempStudent = new Student(dataToCopy);
+    copy->insertNode(tempStudent->getID(), tempStudent);
+  }
+  return copy;
+}
+
+BST<Faculty*>* Database::copyFacultyRecord() {
+  BST<Faculty*>* copy = new BST<Faculty*>();
+  LinkedList<int>* listOfKeys = facultyRecord->getListOfKeysPostOrder();
+  int tempID = 0;
+  while(!listOfKeys->isEmpty()) {
+    tempID = listOfKeys->remove(listOfKeys->valueAt(0));
+    Faculty* tempFaculty = facultyRecord->getDataOfNodeFromKey(tempID);
+    string dataToCopy = to_string(*tempFaculty);
+    tempFaculty = new Faculty(dataToCopy);
+    copy->insertNode(tempFaculty->getID(), tempFaculty);
+  }
+  return copy;
+}
+
+BST<Student*>* Database::restoreStudentRecord(BST<Student*>* backup) {
+  BST<Student*>* temp = studentRecord;
+  studentRecord = backup;
+  backup = temp;
+  return backup;
+}
+BST<Faculty*>* Database::restoreFacultyRecord(BST<Faculty*>* backup) {
+  BST<Faculty*>* temp = facultyRecord;
+  facultyRecord = backup;
+  backup = temp;
+  return backup;
 }

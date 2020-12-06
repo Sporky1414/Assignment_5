@@ -1,4 +1,4 @@
-#include "Database.h"
+#include "Rollback.h"
 
 using namespace std;
 
@@ -28,5 +28,9 @@ class Simulation {
 
     int getNumResponse();
 
+    void prepBackup();
+    void restoreBackup();
+
     Database* database;
+    Rollback* backups;
 };

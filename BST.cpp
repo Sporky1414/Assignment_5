@@ -29,6 +29,7 @@ class BST {
     string printPostOrderRef();
     string printPostOrderPointer();
     LinkedList<int>* getListOfKeysInOrder();
+    LinkedList<int>* getListOfKeysPostOrder();
 
 
 
@@ -44,6 +45,7 @@ class BST {
     string printPostOrderRec(TreeNode<T>* nodeToStart, bool tIsPointer);
     string printPostOrderRec(TreeNode<T>* nodeToStart);
     void getListOfKeysInOrderRec(LinkedList<int>* keyList, TreeNode<T>* nodeToStart);
+    void getListOfKeysPostOrderRec(LinkedList<int>* keyList, TreeNode<T>* nodeToStart);
     int getHeightOfTreeRec(TreeNode<T>* rootNodeForSubtree);
 };
 
@@ -297,6 +299,23 @@ void BST<T>::getListOfKeysInOrderRec(LinkedList<int>* keysList, TreeNode<T>* nod
   getListOfKeysInOrderRec(keysList, nodeToStart->left);
   keysList->append(nodeToStart->key);
   getListOfKeysInOrderRec(keysList, nodeToStart->right);
+}
+
+template <class T>
+LinkedList<int>* BST<T>::getListOfKeysPostOrder() {
+  LinkedList<int>* tempList = new LinkedList<int>();
+  getListOfKeysPostOrderRec(tempList, root);
+  return tempList;
+}
+
+template <class T>
+void BST<T>::getListOfKeysPostOrderRec(LinkedList<int>* keysList, TreeNode<T>* nodeToStart) {
+  if(nodeToStart == NULL) {
+    return;
+  }
+  getListOfKeysPostOrderRec(keysList, nodeToStart->left);
+  getListOfKeysPostOrderRec(keysList, nodeToStart->right);
+  keysList->append(nodeToStart->key);
 }
 
 template <class T>

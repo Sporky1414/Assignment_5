@@ -25,6 +25,12 @@ class Database {
     bool facultyRecordHasData();
     bool facultyRecordHasMoreThanOneFaculty();
 
+    BST<Student*>* copyStudentRecord();
+    BST<Faculty*>* copyFacultyRecord();
+
+    BST<Student*>* restoreStudentRecord(BST<Student*>* backup);
+    BST<Faculty*>* restoreFacultyRecord(BST<Faculty*>* backup);
+
   private:
     BST<Student*>* studentRecord;
     BST<Faculty*>* facultyRecord;

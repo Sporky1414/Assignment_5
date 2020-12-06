@@ -7,7 +7,7 @@
 #this Makefile goes in the src directory
 
 #change this to the correct assignment #
-EXECUTABLE := assignment4
+EXECUTABLE := assignment5
 
 # the source files to be built
 SOURCES := *.cpp
